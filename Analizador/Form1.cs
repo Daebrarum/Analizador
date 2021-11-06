@@ -301,19 +301,22 @@ namespace Analizador
                 partesCondicion[0] = partesCondicion[0] + cadenaCondicion[posicionCaracter];
                 posicionCaracter++;
             }
+            partesCondicion[0] = partesCondicion[0].Trim();
             while (caracteresLogicos.Contains(cadenaCondicion[posicionCaracter]))
             {
                 partesCondicion[1] = partesCondicion[1] + cadenaCondicion[posicionCaracter];
                 posicionCaracter++;
             }
-            while (cadenaCondicion[posicionCaracter] != ')' || 
-                cadenaCondicion[posicionCaracter] != ' ' ||
-                cadenaCondicion[posicionCaracter] != '&' ||
+            partesCondicion[1] = partesCondicion[1].Trim();
+            while (posicionCaracter < cadenaCondicion.Length &&
+                cadenaCondicion[posicionCaracter] != ')' && 
+                cadenaCondicion[posicionCaracter] != '&' &&
                 cadenaCondicion[posicionCaracter] != '|')
             {
                 partesCondicion[2] = partesCondicion[2] + cadenaCondicion[posicionCaracter];
                 posicionCaracter++;
             }
+            partesCondicion[2] = partesCondicion[2].Trim();
             return partesCondicion;
         }
 
@@ -436,15 +439,14 @@ namespace Analizador
         {
             if(linea.Length > 3)
             {
-                if(linea.Substring(linea.Length - 3, 2).Equals("++"))
+                string nombreVariable = linea.Substring(0, linea.Length - 3);
+                if (linea.Substring(linea.Length - 3, 2).Equals("++"))
                 {
-                    string nombreVariable = linea.Substring(0, linea.Length - 3);
                     listaVariables[nombreVariable] = listaVariables[nombreVariable] + 1;
                     return true;
                 }
                 if (linea.Substring(linea.Length - 3, 2).Equals("--"))
                 {
-                    string nombreVariable = linea.Substring(0, linea.Length - 3);
                     listaVariables[nombreVariable] = listaVariables[nombreVariable] - 1;
                     return true;
                 }
@@ -472,10 +474,9 @@ namespace Analizador
         private int realizaWhile(int numeroLineaActual)
         {
             string cadenaCondicion = lineas[numeroLineaActual].Split('(')[1];
-            string[] partesCondicion = separaCadenaCondicion(cadenaCondicion);
+            string[] partesCondicion = desestructurarCadenaCondicion(cadenaCondicion);
             int numeroLineaAuxiliar = numeroLineaActual;
-            while (verificaCondicion(partesCondicion[0].Trim(), partesCondicion[1].Trim(), partesCondicion[2].Trim()))
-            {
+            while (comprobarCondiciones(partesCondicion)) { 
                 numeroLineaActual = analizar(numeroLineaAuxiliar + 1);
             }
             if (numeroLineaActual == numeroLineaAuxiliar) numeroLineaActual = saltarcodigo(numeroLineaActual);
